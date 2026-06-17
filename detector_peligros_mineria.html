@@ -277,237 +277,7 @@
   }
 
   .nivel-badge.alto { background: rgba(230,51,41,0.15); border: 2px solid var(--alerta-rojo); }
-  .nivel-badge.medio { background: rgba(245,166,35,0.15); border: 2px solid var(--alerta-amarillo); }
-  .nivel-badge.bajo { background: rgba(46,204,113,0.15); border: 2px solid var(--alerta-verde); }
-
-  .nivel-icono { font-size: 36px; }
-
-  .nivel-texto h3 {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--gris-claro);
-    margin-bottom: 4px;
-  }
-
-  .nivel-texto strong {
-    font-size: 22px;
-    font-weight: 800;
-  }
-
-  .nivel-badge.alto .nivel-texto strong { color: var(--alerta-rojo); }
-  .nivel-badge.medio .nivel-texto strong { color: var(--alerta-amarillo); }
-  .nivel-badge.bajo .nivel-texto strong { color: var(--alerta-verde); }
-
-  .seccion {
-    background: var(--carbon);
-    border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 14px;
-  }
-
-  .seccion h4 {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--gris-claro);
-    margin-bottom: 12px;
-  }
-
-  .peligro-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--gris-oscuro);
-  }
-
-  .peligro-item:last-child { border-bottom: none; }
-
-  .peligro-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    margin-top: 5px;
-  }
-
-  .peligro-dot.critico { background: var(--alerta-rojo); }
-  .peligro-dot.moderado { background: var(--alerta-amarillo); }
-  .peligro-dot.leve { background: var(--alerta-verde); }
-
-  .peligro-nombre {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--blanco);
-  }
-
-  .peligro-desc {
-    font-size: 12px;
-    color: var(--gris-claro);
-    margin-top: 2px;
-    line-height: 1.4;
-  }
-
-  .control-item {
-    display: flex;
-    gap: 10px;
-    padding: 8px 0;
-    font-size: 13px;
-    color: var(--blanco);
-    border-bottom: 1px solid var(--gris-oscuro);
-    line-height: 1.4;
-  }
-
-  .control-item:last-child { border-bottom: none; }
-  .control-item::before { content: "→"; color: var(--cobre); flex-shrink: 0; }
-
-  .resumen-texto {
-    font-size: 13px;
-    color: var(--blanco);
-    line-height: 1.6;
-  }
-
-  /* BOTONES POST ANÁLISIS */
-  .acciones {
-    display: flex;
-    gap: 12px;
-    margin-top: 20px;
-  }
-
-  .btn-pdf {
-    flex: 1;
-    padding: 14px;
-    background: transparent;
-    border: 2px solid var(--cobre);
-    color: var(--cobre);
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: background 0.2s, color 0.2s;
-  }
-
-  .btn-pdf:hover {
-    background: var(--cobre);
-    color: var(--negro);
-  }
-
-  .btn-nueva {
-    flex: 1;
-    padding: 14px;
-    background: var(--gris-oscuro);
-    border: none;
-    color: var(--blanco);
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-
-  .btn-nueva:hover { background: var(--gris-medio); }
-
-  /* FECHA/HORA */
-  .meta-info {
-    font-size: 11px;
-    color: var(--gris-claro);
-    text-align: right;
-    margin-top: 12px;
-    letter-spacing: 0.05em;
-  }
-
-  footer {
-    text-align: center;
-    padding: 16px;
-    font-size: 11px;
-    color: var(--gris-medio);
-    letter-spacing: 0.05em;
-    border-top: 1px solid var(--gris-oscuro);
-  }
-
-  @media (max-width: 400px) {
-    main { padding: 16px 14px; }
-    .btn-analizar { font-size: 14px; }
-  }
-</style>
-</head>
-<body>
-
-<header>
-  <div class="logo-dot"></div>
-  <h1>Detector de Peligros</h1>
-  <span>DVEN · SSO</span>
-</header>
-
-<main>
-
-  <!-- ZONA DE CARGA -->
-  <div class="upload-zone" id="uploadZone">
-    <span class="upload-icon">📷</span>
-    <h2>Fotografía el área de trabajo</h2>
-    <p>Toma una foto o selecciona una desde tu galería</p>
-    <div class="botones-carga">
-      <label class="btn-carga btn-camara-real">
-        <input type="file" id="camaraInput" accept="image/*" capture="environment">
-        <span class="btn-carga-icon">📷</span>
-        Tomar foto
-      </label>
-      <label class="btn-carga btn-galeria">
-        <input type="file" id="fileInput" accept="image/*">
-        <span class="btn-carga-icon">🖼</span>
-        Galería
-      </label>
-    </div>
-  </div>
-
-  <!-- PREVIEW IMAGEN -->
-  <div class="preview-wrap" id="previewWrap">
-    <img id="previewImg" src="" alt="Vista previa">
-    <button class="btn-cambiar" onclick="resetImagen()">Cambiar foto</button>
-  </div>
-
-  <!-- DESCRIPCION OPCIONAL -->
-  <div class="campo-descripcion" id="campoDesc" style="display:none">
-    <label>Descripción adicional (opcional)</label>
-    <textarea id="descripcion" rows="3" placeholder="Ej: Trabajos de mantención en horno N°2, turno noche..."></textarea>
-  </div>
-
-  <!-- BOTON ANALIZAR -->
-  <button class="btn-analizar" id="btnAnalizar" onclick="analizarImagen()" disabled>
-    🔍 Analizar peligros
-  </button>
-
-  <!-- LOADING -->
-  <div class="loading" id="loadingDiv">
-    <div class="spinner"></div>
-    <p>Analizando la situación...</p>
-  </div>
-
-  <!-- RESULTADOS -->
-  <div class="resultados" id="resultados"></div>
-
-</main>
-
-<footer>Codelco División Ventanas · Análisis SSO</footer>
-
-<script>
-  let imagenBase64 = null;
-  let analisisActual = null;
-
-  const fileInput = document.getElementById('fileInput');
-  const camaraInput = document.getElementById('camaraInput');
-  const previewWrap = document.getElementById('previewWrap');
-  const previewImg = document.getElementById('previewImg');
-  const uploadZone = document.getElementById('uploadZone');
-  const campoDesc = document.getElementById('campoDesc');
-  const btnAnalizar = document.getElementById('btnAnalizar');
-
-  // Galería
-  fileInput.addEventListener('change', (e) => {
+< truncated lines 280-510 >
     if (e.target.files[0]) cargarImagen(e.target.files[0]);
   });
 
@@ -516,7 +286,10 @@
     if (e.target.files[0]) cargarImagen(e.target.files[0]);
   });
 
+  let imagenMimeType = 'image/jpeg';
+
   function cargarImagen(file) {
+    imagenMimeType = file.type || 'image/jpeg';
     const reader = new FileReader();
     reader.onload = (e) => {
       imagenBase64 = e.target.result.split(',')[1];
@@ -600,7 +373,7 @@ Responde ÚNICAMENTE con un objeto JSON con esta estructura exacta (sin markdown
             parts: [
               {
                 inline_data: {
-                  mime_type: 'image/jpeg',
+                  mime_type: imagenMimeType,
                   data: imagenBase64
                 }
               },
