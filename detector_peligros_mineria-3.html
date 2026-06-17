@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Detector de Peligros — DVEN</title>
+<style>
+  :root {
+    --negro: #0f0f0f;
+    --carbon: #1a1a1a;
+    --gris-oscuro: #2a2a2a;
+    --gris-medio: #444;
+    --gris-claro: #888;
+    --blanco: #f5f5f5;
+    --alerta-rojo: #e63329;
+    --alerta-amarillo: #f5a623;
+    --alerta-verde: #2ecc71;
+    --cobre: #b87333;
+    --cobre-claro: #d4915a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--negro);
+    color: var(--blanco);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: var(--carbon);
+    border-bottom: 2px solid var(--cobre);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--cobre);
+    flex-shrink: 0;
+  }
+
+  header h1 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--blanco);
+  }
+
+  header span {
+    font-size: 11px;
+    color: var(--gris-claro);
+    margin-left: auto;
+    letter-spacing: 0.08em;
+  }
+
+  main {
+    flex: 1;
+    padding: 24px 20px;
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* ZONA DE CARGA */
+  .upload-zone {
+    border: 2px dashed var(--gris-medio);
+    border-radius: 12px;
+    padding: 28px 20px 24px;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s;
+    background: var(--carbon);
+  }
+
+  .upload-zone.drag-over {
+    border-color: var(--cobre);
+    background: #1f1a15;
+  }
+
+  .upload-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .upload-zone h2 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--blanco);
+  }
+
+  .upload-zone p {
+    font-size: 12px;
+    color: var(--gris-claro);
+    margin-bottom: 20px;
+  }
+
+  .botones-carga {
+    display: flex;
+    gap: 12px;
+  }
+
+  .btn-carga {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 18px 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-carga:active { transform: scale(0.97); }
+
+  .btn-carga input[type="file"] {
+    position: absolute; inset: 0;
+    opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+
+  .btn-carga-icon { font-size: 26px; }
+
+  .btn-camara-real {
+    background: var(--cobre);
+    color: var(--negro);
+  }
+
+  .btn-galeria {
+    background: var(--gris-oscuro);
+    color: var(--blanco);
+    border: 1px solid var(--gris-medio) !important;
+  }
+
+  /* PREVIEW */
+  .preview-wrap {
+    display: none;
+    margin-top: 20px;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .preview-wrap img {
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .btn-cambiar {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  /* DESCRIPCION OPCIONAL */
+  .campo-descripcion {
+    margin-top: 16px;
+  }
+
+  .campo-descripcion label {
+    font-size: 12px;
+    color: var(--gris-claro);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .campo-descripcion textarea {
+    width: 100%;
+    background: var(--carbon);
+    border: 1px solid var(--gris-medio);
+    border-radius: 8px;
+    color: var(--blanco);
+    font-size: 14px;
+    padding: 12px;
+    resize: none;
+    font-family: inherit;
+    line-height: 1.5;
+    transition: border-color 0.2s;
+  }
+
+  .campo-descripcion textarea:focus {
+    outline: none;
+    border-color: var(--cobre);
+  }
+
+  /* BOTON ANALIZAR */
+  .btn-analizar {
+    width: 100%;
+    margin-top: 20px;
+    padding: 16px;
+    background: var(--cobre);
+    color: var(--negro);
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .btn-analizar:hover { background: var(--cobre-claro); }
+  .btn-analizar:active { transform: scale(0.98); }
+  .btn-analizar:disabled {
+    background: var(--gris-medio);
+    color: var(--gris-claro);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* LOADING */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--gris-medio);
+    border-top-color: var(--cobre);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading p {
+    font-size: 14px;
+    color: var(--gris-claro);
+  }
+
+  /* RESULTADOS */
+  .resultados {
+    display: none;
+    margin-top: 24px;
+  }
+
+  .nivel-badge {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+
+  .nivel-badge.alto { background: rgba(230,51,41,0.15); border: 2px solid var(--alerta-rojo); }
+  .nivel-badge.medio { background: rgba(245,166,35,0.15); border: 2px solid var(--alerta-amarillo); }
+  .nivel-badge.bajo { background: rgba(46,204,113,0.15); border: 2px solid var(--alerta-verde); }
+
+  .nivel-icono { font-size: 36px; }
+
+  .nivel-texto h3 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gris-claro);
+    margin-bottom: 4px;
+  }
+
+  .nivel-texto strong {
+    font-size: 22px;
+    font-weight: 800;
+  }
+
+  .nivel-badge.alto .nivel-texto strong { color: var(--alerta-rojo); }
+  .nivel-badge.medio .nivel-texto strong { color: var(--alerta-amarillo); }
+  .nivel-badge.bajo .nivel-texto strong { color: var(--alerta-verde); }
+
+  .seccion {
+    background: var(--carbon);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+
+  .seccion h4 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gris-claro);
+    margin-bottom: 12px;
+  }
+
+  .peligro-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gris-oscuro);
+  }
+
+  .peligro-item:last-child { border-bottom: none; }
+
+  .peligro-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+
+  .peligro-dot.critico { background: var(--alerta-rojo); }
+  .peligro-dot.moderado { background: var(--alerta-amarillo); }
+  .peligro-dot.leve { background: var(--alerta-verde); }
+
+  .peligro-nombre {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--blanco);
+  }
+
+  .peligro-desc {
+    font-size: 12px;
+    color: var(--gris-claro);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  .control-item {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 13px;
+    color: var(--blanco);
+    border-bottom: 1px solid var(--gris-oscuro);
+    line-height: 1.4;
+  }
+
+  .control-item:last-child { border-bottom: none; }
+  .control-item::before { content: "→"; color: var(--cobre); flex-shrink: 0; }
+
+  .resumen-texto {
+    font-size: 13px;
+    color: var(--blanco);
+    line-height: 1.6;
+  }
+
+  /* BOTONES POST ANÁLISIS */
+  .acciones {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .btn-pdf {
+    flex: 1;
+    padding: 14px;
+    background: transparent;
+    border: 2px solid var(--cobre);
+    color: var(--cobre);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .btn-pdf:hover {
+    background: var(--cobre);
+    color: var(--negro);
+  }
+
+  .btn-nueva {
+    flex: 1;
+    padding: 14px;
+    background: var(--gris-oscuro);
+    border: none;
+    color: var(--blanco);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-nueva:hover { background: var(--gris-medio); }
+
+  /* FECHA/HORA */
+  .meta-info {
+    font-size: 11px;
+    color: var(--gris-claro);
+    text-align: right;
+    margin-top: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  footer {
+    text-align: center;
+    padding: 16px;
+    font-size: 11px;
+    color: var(--gris-medio);
+    letter-spacing: 0.05em;
+    border-top: 1px solid var(--gris-oscuro);
+  }
+
+  @media (max-width: 400px) {
+    main { padding: 16px 14px; }
+    .btn-analizar { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-dot"></div>
+  <h1>Detector de Peligros</h1>
+  <span>DVEN · SSO</span>
+</header>
+
+<main>
+
+  <!-- ZONA DE CARGA -->
+  <div class="upload-zone" id="uploadZone">
+    <span class="upload-icon">📷</span>
+    <h2>Fotografía el área de trabajo</h2>
+    <p>Toma una foto o selecciona una desde tu galería</p>
+    <div class="botones-carga">
+      <label class="btn-carga btn-camara-real">
+        <input type="file" id="camaraInput" accept="image/*" capture="environment">
+        <span class="btn-carga-icon">📷</span>
+        Tomar foto
+      </label>
+      <label class="btn-carga btn-galeria">
+        <input type="file" id="fileInput" accept="image/*">
+        <span class="btn-carga-icon">🖼</span>
+        Galería
+      </label>
+    </div>
+  </div>
+
+  <!-- PREVIEW IMAGEN -->
+  <div class="preview-wrap" id="previewWrap">
+    <img id="previewImg" src="" alt="Vista previa">
+    <button class="btn-cambiar" onclick="resetImagen()">Cambiar foto</button>
+  </div>
+
+  <!-- DESCRIPCION OPCIONAL -->
+  <div class="campo-descripcion" id="campoDesc" style="display:none">
+    <label>Descripción adicional (opcional)</label>
+    <textarea id="descripcion" rows="3" placeholder="Ej: Trabajos de mantención en horno N°2, turno noche..."></textarea>
+  </div>
+
+  <!-- BOTON ANALIZAR -->
+  <button class="btn-analizar" id="btnAnalizar" onclick="analizarImagen()" disabled>
+    🔍 Analizar peligros
+  </button>
+
+  <!-- LOADING -->
+  <div class="loading" id="loadingDiv">
+    <div class="spinner"></div>
+    <p>Analizando la situación...</p>
+  </div>
+
+  <!-- RESULTADOS -->
+  <div class="resultados" id="resultados"></div>
+
+</main>
+
+<footer>Codelco División Ventanas · Análisis SSO</footer>
+
+<script>
+  let imagenBase64 = null;
+  let analisisActual = null;
+
+  const fileInput = document.getElementById('fileInput');
+  const camaraInput = document.getElementById('camaraInput');
+  const previewWrap = document.getElementById('previewWrap');
+  const previewImg = document.getElementById('previewImg');
+  const uploadZone = document.getElementById('uploadZone');
+  const campoDesc = document.getElementById('campoDesc');
+  const btnAnalizar = document.getElementById('btnAnalizar');
+
+  // Galería
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files[0]) cargarImagen(e.target.files[0]);
+  });
+
+  // Cámara
+  camaraInput.addEventListener('change', (e) => {
+    if (e.target.files[0]) cargarImagen(e.target.files[0]);
+  });
+
+  function cargarImagen(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      imagenBase64 = e.target.result.split(',')[1];
+      previewImg.src = e.target.result;
+      uploadZone.style.display = 'none';
+      previewWrap.style.display = 'block';
+      campoDesc.style.display = 'block';
+      btnAnalizar.disabled = false;
+      document.getElementById('resultados').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function resetImagen() {
+    imagenBase64 = null;
+    uploadZone.style.display = 'block';
+    previewWrap.style.display = 'none';
+    campoDesc.style.display = 'none';
+    btnAnalizar.disabled = true;
+    document.getElementById('resultados').style.display = 'none';
+    document.getElementById('loadingDiv').style.display = 'none';
+    fileInput.value = '';
+    camaraInput.value = '';
+  }
+
+  // Drag & drop
+  uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) cargarImagen(e.dataTransfer.files[0]);
+  });
+
+  async function analizarImagen() {
+    if (!imagenBase64) return;
+
+    const descripcion = document.getElementById('descripcion').value.trim();
+    const loading = document.getElementById('loadingDiv');
+    const resultados = document.getElementById('resultados');
+
+    btnAnalizar.disabled = true;
+    loading.style.display = 'block';
+    resultados.style.display = 'none';
+
+    const promptBase = `Eres un experto en seguridad y salud ocupacional para minería de cobre, específicamente en operaciones de fundición y refinería (ambiente similar a Codelco División Ventanas, Chile).
+
+Analiza esta imagen e identifica TODOS los peligros presentes o inferibles por el contexto visual. Considera:
+- Peligros físicos: alturas, energía eléctrica, objetos en movimiento, superficies calientes, metal fundido, escorias
+- Peligros químicos: SO₂, arsénico (infiere por contexto si hay hornos, escorias o concentrados visibles), ácido sulfúrico, gases, polvo metálico
+- Peligros de orden y aseo: derrames, obstrucciones, señalética ausente
+- Estado de EPP visible en trabajadores
+- Condiciones ambientales: iluminación, espacios confinados, ventilación
+
+${descripcion ? `Contexto adicional del trabajador: ${descripcion}` : ''}
+
+Responde ÚNICAMENTE con un objeto JSON con esta estructura exacta (sin markdown ni backticks):
+{
+  "nivel_riesgo": "ALTO" | "MEDIO" | "BAJO",
+  "resumen": "descripción breve de la situación en 2-3 oraciones",
+  "peligros": [
+    {
+      "nombre": "nombre del peligro",
+      "severidad": "critico" | "moderado" | "leve",
+      "descripcion": "explicación breve de por qué existe este peligro en la imagen"
+    }
+  ],
+  "controles": [
+    "acción de control recomendada 1",
+    "acción de control recomendada 2"
+  ]
+}`;
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1000,
+          messages: [{
+            role: 'user',
+            content: [
+              {
+                type: 'image',
+                source: { type: 'base64', media_type: 'image/jpeg', data: imagenBase64 }
+              },
+              { type: 'text', text: promptBase }
+            ]
+          }]
+        })
+      });
+
+      const data = await response.json();
+      const texto = data.content.map(i => i.text || '').join('');
+      const clean = texto.replace(/```json|```/g, '').trim();
+      const analisis = JSON.parse(clean);
+      analisisActual = analisis;
+      mostrarResultados(analisis);
+
+    } catch (err) {
+      loading.style.display = 'none';
+      btnAnalizar.disabled = false;
+      resultados.style.display = 'block';
+      resultados.innerHTML = `<div class="seccion" style="border: 1px solid var(--alerta-rojo)">
+        <p style="color: var(--alerta-rojo); font-size:14px">⚠️ Error al analizar la imagen. Verifica tu conexión e intenta nuevamente.</p>
+      </div>`;
+    }
+  }
+
+  function mostrarResultados(analisis) {
+    const loading = document.getElementById('loadingDiv');
+    const resultados = document.getElementById('resultados');
+    const ahora = new Date();
+    const fecha = ahora.toLocaleDateString('es-CL');
+    const hora = ahora.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+
+    loading.style.display = 'none';
+    resultados.style.display = 'block';
+    btnAnalizar.disabled = false;
+
+    const nivelConfig = {
+      'ALTO': { clase: 'alto', icono: '🔴', label: 'Riesgo Alto' },
+      'MEDIO': { clase: 'medio', icono: '🟡', label: 'Riesgo Medio' },
+      'BAJO': { clase: 'bajo', icono: '🟢', label: 'Riesgo Bajo' }
+    };
+    const nc = nivelConfig[analisis.nivel_riesgo] || nivelConfig['MEDIO'];
+
+    const peligrosHTML = analisis.peligros.map(p => `
+      <div class="peligro-item">
+        <div class="peligro-dot ${p.severidad}"></div>
+        <div>
+          <div class="peligro-nombre">${p.nombre}</div>
+          <div class="peligro-desc">${p.descripcion}</div>
+        </div>
+      </div>
+    `).join('');
+
+    const controlesHTML = analisis.controles.map(c => `
+      <div class="control-item">${c}</div>
+    `).join('');
+
+    resultados.innerHTML = `
+      <div class="nivel-badge ${nc.clase}">
+        <span class="nivel-icono">${nc.icono}</span>
+        <div class="nivel-texto">
+          <h3>Nivel de riesgo detectado</h3>
+          <strong>${nc.label}</strong>
+        </div>
+      </div>
+
+      <div class="seccion">
+        <h4>Resumen de la situación</h4>
+        <p class="resumen-texto">${analisis.resumen}</p>
+      </div>
+
+      <div class="seccion">
+        <h4>Peligros identificados</h4>
+        ${peligrosHTML}
+      </div>
+
+      <div class="seccion">
+        <h4>Controles recomendados</h4>
+        ${controlesHTML}
+      </div>
+
+      <div class="meta-info">Análisis realizado el ${fecha} a las ${hora}</div>
+
+      <div class="acciones">
+        <button class="btn-pdf" onclick="exportarPDF()">📄 Exportar PDF</button>
+        <button class="btn-nueva" onclick="resetImagen()">Nueva foto</button>
+      </div>
+    `;
+  }
+
+  function exportarPDF() {
+    if (!analisisActual) return;
+    const ahora = new Date();
+    const fecha = ahora.toLocaleDateString('es-CL');
+    const hora = ahora.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+    const imgSrc = previewImg.src;
+
+    const nivelColores = {
+      'ALTO': '#e63329',
+      'MEDIO': '#f5a623',
+      'BAJO': '#2ecc71'
+    };
+    const color = nivelColores[analisisActual.nivel_riesgo] || '#f5a623';
+
+    const peligrosHTML = analisisActual.peligros.map(p => {
+      const dotColor = p.severidad === 'critico' ? '#e63329' : p.severidad === 'moderado' ? '#f5a623' : '#2ecc71';
+      return `<tr>
+        <td style="padding:8px; border-bottom:1px solid #eee;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${dotColor};margin-right:8px;vertical-align:middle"></span>
+          <strong>${p.nombre}</strong>
+        </td>
+        <td style="padding:8px; border-bottom:1px solid #eee; color:#555; font-size:13px">${p.descripcion}</td>
+      </tr>`;
+    }).join('');
+
+    const controlesHTML = analisisActual.controles.map(c =>
+      `<li style="margin-bottom:8px; color:#333">${c}</li>`
+    ).join('');
+
+    const ventana = window.open('', '_blank');
+    ventana.document.write(`<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Informe de Peligros DVEN</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; padding: 40px; color: #222; }
+  .header { border-bottom: 3px solid #b87333; padding-bottom: 16px; margin-bottom: 24px; display:flex; justify-content:space-between; align-items:flex-end; }
+  .header h1 { font-size: 20px; color: #b87333; margin:0; }
+  .header p { font-size: 12px; color: #888; margin:4px 0 0; }
+  .meta { font-size: 12px; color: #888; text-align:right; }
+  .nivel { display:inline-block; padding: 10px 20px; border-radius: 8px; background: ${color}22; border: 2px solid ${color}; color: ${color}; font-size: 20px; font-weight: 800; margin-bottom: 20px; }
+  .seccion { margin-bottom: 24px; }
+  .seccion h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin-bottom: 10px; }
+  .resumen { background: #f9f9f9; border-left: 4px solid #b87333; padding: 14px; border-radius: 4px; font-size: 14px; line-height: 1.6; color: #333; }
+  table { width: 100%; border-collapse: collapse; }
+  img.foto { width: 100%; max-height: 260px; object-fit: cover; border-radius: 8px; margin-bottom: 24px; }
+  .footer { margin-top: 40px; border-top: 1px solid #ddd; padding-top: 12px; font-size: 11px; color: #aaa; text-align:center; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <h1>Informe de Detección de Peligros</h1>
+    <p>Codelco División Ventanas · Dirección de Seguridad y Salud Ocupacional</p>
+  </div>
+  <div class="meta">${fecha}<br>${hora}</div>
+</div>
+
+<img class="foto" src="${imgSrc}" alt="Imagen analizada">
+
+<div class="seccion">
+  <h2>Nivel de riesgo</h2>
+  <div class="nivel">⚠ ${analisisActual.nivel_riesgo}</div>
+</div>
+
+<div class="seccion">
+  <h2>Resumen de la situación</h2>
+  <div class="resumen">${analisisActual.resumen}</div>
+</div>
+
+<div class="seccion">
+  <h2>Peligros identificados</h2>
+  <table>${peligrosHTML}</table>
+</div>
+
+<div class="seccion">
+  <h2>Controles recomendados</h2>
+  <ul>${controlesHTML}</ul>
+</div>
+
+<div class="footer">Generado automáticamente por el Sistema de Detección de Peligros SSO · DVEN</div>
+
+<script>window.onload = () => { window.print(); }<\/script>
+</body></html>`);
+    ventana.document.close();
+  }
+</script>
+</body>
+</html>
